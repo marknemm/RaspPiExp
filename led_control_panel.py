@@ -12,9 +12,6 @@ buttons = RadioButtonArray([13, 14, 15])
 led = RgbLED(18, 17, 16)
 led.on()
 
-prev_intensity = None
-prev_frequency = None
-
 while True:
   try:
     if buttons.sel_idx is not None:
@@ -24,11 +21,7 @@ while True:
       frequency = pot_frequency.range_normalize_value((10, 1000))
       led.color_frequency(buttons.sel_idx, frequency)
 
-    if led.intensity != prev_intensity or led.freq != prev_frequency:
-      print(f"Intensity: {led.intensity}\t -- \t Frequency: {led.freq}")
-      prev_intensity = led.intensity
-      prev_frequency = led.freq
-
+    print("\r", f"Intensity: {led.intensity}\t Frequency: {led.freq}", end='')
     sleep(.1)
   except KeyboardInterrupt:
     break
