@@ -1,5 +1,7 @@
 from utime import sleep_ms
 
+from utils.hardware_interrupt import HARDWARE_INTERRUPT_INSTANCES
+
 def main_loop(callback, delay_ms = 100):
   """
   Executes a given callback function on a main event loop.
@@ -15,6 +17,8 @@ def main_loop(callback, delay_ms = 100):
 
   while True:
     try:
+      for interrupt_instance in HARDWARE_INTERRUPT_INSTANCES:
+        interrupt_instance.clear_interrupt()
       callback()
       sleep_ms(delay_ms)
     except KeyboardInterrupt:
