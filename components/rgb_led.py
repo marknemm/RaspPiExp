@@ -1,15 +1,7 @@
 from components.led import LED
 
-
 class RgbLED:
-  """
-  An RGB LED controlled by PWM Pin output across 3 channels.
-
-  Args:
-    red_pin_id: The ID of the Pin that will control the red LED.
-    green_pin_id: The ID of the Pin that will control the green LED.
-    blue_pin_id: The ID of the Pin that will control the blue LED.
-  """
+  """ An RGB LED controlled by PWM Pin output across 3 channels. """
 
   COLORS = ['RED', 'GREEN', 'BLUE']
   COLOR_CODES = [0, 1, 2]
@@ -19,6 +11,12 @@ class RgbLED:
   BLUE = COLOR_CODES[2]
 
   def __init__(self, red_pin_id: int, green_pin_id: int, blue_pin_id: int):
+    """
+    Args:
+      red_pin_id: The ID of the Pin that will control the red LED.
+      green_pin_id: The ID of the Pin that will control the green LED.
+      blue_pin_id: The ID of the Pin that will control the blue LED.
+    """
     self.__red_led = LED(red_pin_id)
     self.__green_led = LED(green_pin_id)
     self.__blue_led = LED(blue_pin_id)
@@ -26,10 +24,10 @@ class RgbLED:
   @property
   def freq(self) -> tuple[int, int, int]:
     """
-    Gets all RGB frequency values in range [0, 65535].
+    Gets all RGB frequency values in range `[0, 65535]`.
 
     Returns:
-      An RGB tuple containing all color frequency values in range [0, 65535].
+      An RGB tuple containing all color frequency values in range `[0, 65535]`.
     """
     return (
       self.__red_led.freq,
@@ -40,10 +38,10 @@ class RgbLED:
   @property
   def intensity(self) -> tuple[int, int, int]:
     """
-    Gets all RGB color intensity values in range [0, 255].
+    Gets all RGB color intensity values in range `[0, 255]`.
 
     Returns:
-      An RGB tuple containing all color intensity values in range [0, 255].
+      An RGB tuple containing all color intensity values in range `[0, 255]`.
     """
 
     return (
@@ -55,10 +53,10 @@ class RgbLED:
   @property
   def intensity_u16(self) -> tuple[int, int, int]:
     """
-    Gets all RGB color intensity values in range [0, 65535].
+    Gets all RGB color intensity values in range `[0, 65535]`.
 
     Returns:
-      An RGB tuple containing all color intensity values in range [0, 65535].
+      An RGB tuple containing all color intensity values in range `[0, 65535]`.
     """
 
     return (
@@ -72,8 +70,8 @@ class RgbLED:
     Turns the RGB LED on.
 
     Args:
-      intensity: An optional RGB tuple containing all color intensity values. Defaults to (255, 255, 255).
-      freq: An optional RGB tuple containing all color frequency (Hz) values. Defaults to (1000, 1000, 1000).
+      intensity: An optional RGB tuple containing all color intensity values. Defaults to `(255, 255, 255)`.
+      freq: An optional RGB tuple containing all color frequency (Hz) values. Defaults to `(1000, 1000, 1000)`.
     """
     self.color_intensity(RgbLED.RED, intensity[RgbLED.RED])
     self.color_intensity(RgbLED.GREEN, intensity[RgbLED.GREEN])
@@ -89,20 +87,27 @@ class RgbLED:
     self.color_intensity(RgbLED.GREEN, 0)
     self.color_intensity(RgbLED.BLUE, 0)
 
+  def toggle(self):
+    """ Toggles the RGB LED either completely on or off. If the LED is partially on, toggles it off. """
+    if self.intensity > (0, 0, 0):
+      self.off()
+    else:
+      self.on()
+
   def color_frequency(self, color: int, value: int | None = None) -> int:
     """
-    Sets and/or gets the intensity of a given colored LED in range [0, 65535].
+    Sets and/or gets the intensity of a given colored LED in range `[0, 65535]`.
 
     Args:
-      color: The color of the LED to set/get the frequency of (RgbLED.RED, RgbLED.GREEN, RgbLED.BLUE).
-      value: The frequency value to set in range [0, 65535]. If not provided, only gets the value.
+      color: The color of the LED to set/get the frequency of (`RgbLED.RED`, `RgbLED.GREEN`, `RgbLED.BLUE`).
+      value: The frequency value to set in range `[0, 65535]`. If not provided, only gets the value.
 
     Returns:
-      The frequency of the colored LED in range [0, 65535].
+      The frequency of the colored LED in range `[0, 65535]`.
 
     Raises:
-      ValueError: If the color argument is outside of range [0, 2].
-      ValueError: If the value argument is outside of range [0, 65535].
+      ValueError: If the color argument is outside of range `[0, 2]`.
+      ValueError: If the value argument is outside of range `[0, 65535]`.
     """
 
     target_led = self.__get_led(color)
@@ -114,18 +119,18 @@ class RgbLED:
 
   def color_intensity(self, color: int, value: int | None = None) -> int:
     """
-    Sets and/or gets the intensity of a given colored LED in range [0, 255].
+    Sets and/or gets the intensity of a given colored LED in range `[0, 255]`.
 
     Args:
-      color: The color of the LED to set/get the intensity of (RgbLED.RED, RgbLED.GREEN, RgbLED.BLUE).
-      value: The intensity value to set in range [0, 255]. If not provided, only gets the value.
+      color: The color of the LED to set/get the intensity of (`RgbLED.RED`, `RgbLED.GREEN`, `RgbLED.BLUE`).
+      value: The intensity value to set in range `[0, 255]`. If not provided, only gets the value.
 
     Returns:
-      The intensity of the colored LED in range [0, 255].
+      The intensity of the colored LED in range `[0, 255]`.
 
     Raises:
-      ValueError: If the color argument is outside of range [0, 2].
-      ValueError: If the value argument is outside of range [0, 255].
+      ValueError: If the color argument is outside of range `[0, 2]`.
+      ValueError: If the value argument is outside of range `[0, 255]`.
     """
 
     target_led = self.__get_led(color)
@@ -137,18 +142,18 @@ class RgbLED:
 
   def color_intensity_u16(self, color: int, value: int | None = None) -> int:
     """
-    Sets and/or gets the intensity of a given colored LED in range [0, 65535].
+    Sets and/or gets the intensity of a given colored LED in range `[0, 65535]`.
 
     Args:
-      color: The color of the LED to set the intensity of (RgbLED.RED, RgbLED.GREEN, RgbLED.BLUE).
-      value: The intensity value to set in range [0, 65535].
+      color: The color of the LED to set the intensity of (`RgbLED.RED`, `RgbLED.GREEN`, `RgbLED.BLUE`).
+      value: The intensity value to set in range `[0, 65535]`.
 
     Returns:
-      The intensity of the colored LED in range [0, 65535].
+      The intensity of the colored LED in range `[0, 65535]`.
 
     Raises:
-      ValueError: If the color argument is outside of range [0, 2].
-      ValueError: If the value argument is outside of range [0, 65535].
+      ValueError: If the color argument is outside of range `[0, 2]`.
+      ValueError: If the value argument is outside of range `[0, 65535]`.
     """
 
     target_led = self.__get_led(color)
@@ -163,13 +168,13 @@ class RgbLED:
     Gets the colored LED object.
 
     Args:
-      color: The color of the LED to retrieve (RgbLED.RED, RgbLED.GREEN, RgbLED.BLUE).
+      color: The color of the LED to retrieve (`RgbLED.RED`, `RgbLED.GREEN`, `RgbLED.BLUE`).
 
     Returns:
       The retrieved colored LED object.
 
     Raises:
-      ValueError: If the color argument is outside of range [0, 2].
+      ValueError: If the color argument is outside of range `[0, 2]`.
     """
 
     if color == RgbLED.RED:
@@ -179,4 +184,4 @@ class RgbLED:
     if color == RgbLED.BLUE:
       return self.__blue_led
 
-    raise ValueError(f"color must be an int in range [0, 2]; was given {color}")
+    raise ValueError(f"color must be an int in range [0, 2]; was given {color}.")

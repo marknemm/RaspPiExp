@@ -4,7 +4,7 @@ class DigitalFilter:
   """
 
   def __init__(self):
-    self._value = None
+    self._value: float | None = None
 
   @property
   def value(self) -> float | None:

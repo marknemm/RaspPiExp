@@ -1,8 +1,6 @@
 from dht import DHT11
-
-from components.button import Button
-
 from utils.main_loop import main_loop
+from components.button import Button
 
 unit_toggle = Button(15)
 sensor = DHT11(16)

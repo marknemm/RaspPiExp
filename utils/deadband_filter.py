@@ -2,7 +2,7 @@ from abstract.digital_filter import DigitalFilter
 
 class DeadbandFilter(DigitalFilter):
   """
-  A deadband filter that only updates the current value if the new value
+  A deadband (low-pass) filter that only updates the current value if the new value
   is more than `deadband` units away from the previous update value.
 
   Args:
@@ -17,7 +17,7 @@ class DeadbandFilter(DigitalFilter):
 
   def filter(self, value: float) -> float:
     """
-    Applies a deadband filter to a given `value`.
+    Applies a deadband (low-pass) filter to a given `value`.
 
     Args:
       value: The new value to apply the deadband filter to.
@@ -26,6 +26,6 @@ class DeadbandFilter(DigitalFilter):
       The resulting value from the deadband filter.
     """
     outside_apply_range = value < self.apply_range[0] or value > self.apply_range[1]
-    if outside_apply_range or self.value is None or abs(value - self.value) > self.deadband:
+    if outside_apply_range or self._value is None or abs(value - self._value) > self.deadband:
       self._value = value
     return self._value

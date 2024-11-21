@@ -2,7 +2,7 @@ from abstract.digital_filter import DigitalFilter
 
 class ExpMovingAverageFilter(DigitalFilter):
   """
-  An exponential moving average filter that calculates the filter value
+  An exponential moving average (low-pass) filter that calculates the filter value
   by applying a small `smoothing_factor` weight to each new value:
 
   `(smoothing_factor * new_value) + ((1 - smoothing_factor * old_value))`.
