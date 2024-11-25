@@ -17,7 +17,7 @@ class Potentiometer:
     """
     Args:
       pin_id: The ID of the Pin that functions as the ADC input for the Potentiometer.
-      sample_period_ms: The optional sample period in milliseconds, which determines the frequency at which to sample Potentiometer values. Defaults to `100`. If set to `0` or a negative number, then sampling does not occur, and the unfiltered voltage value is read directly on each value property read.
+      sample_period_ms: The optional sample period in milliseconds, which determines the frequency at which to sample Potentiometer values. Defaults to `100`. If set to `0` or a negative number, then sampling does not occur, and the voltage value is read directly on each value property read.
       digital_filter: The optional `DigitalFilter` to apply to the sample voltage values. Defaults to a `DeadbandFilter(750, (1000, 64535))`. Supply `IdentityFilter` if no filtering should be applied.
       digital_normalizer: The optional `DigitalNormalizer` to apply to the sample voltage values after any filtering is performed. Defaults to `LinearNormalizer((0, 65535), (0, 100))`. Supply `IdentityNormalizer` if no normalization should be applied.
     """

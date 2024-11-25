@@ -1,30 +1,32 @@
 from machine import Pin
 from utils.hardware_interrupt import HardwareInterrupt
+from utils.interrupt_mutex import InterruptMutex
 
 class Button():
   """
   A press Button controlled by Pin input with internal pull up resistor.
   Keeps track of the 'toggle' state based on the sequence of previous button presses.
-
-  Args:
-    pin_id: The ID of the MCU pin that will record the toggle state of the button.
-    init_toggle_state: The optional initial toggle state of the button; defaults to `False`.
   """
 
   def __init__(self, pin_id, init_toggle_state = False):
+    """
+    Args:
+      pin_id: The ID of the Pin that will record the toggle state of the button.
+      init_toggle_state: The optional initial toggle state of the button; defaults to `False`.
+    """
     self.__button_pin = Pin(pin_id, Pin.IN, Pin.PULL_UP)
     self.__toggle_state = init_toggle_state
 
     self.__press_interrupt = HardwareInterrupt()
     self.__release_interrupt = HardwareInterrupt(self.toggle)
 
-    self.__button_pin.irq(self.__press_interrupt.gen_listener(), Pin.IRQ_FALLING)
-    self.__button_pin.irq(self.__release_interrupt.gen_listener(), Pin.IRQ_RISING)
+    self.__button_pin.irq(self.__press_interrupt.listener(), Pin.IRQ_FALLING)
+    self.__button_pin.irq(self.__release_interrupt.listener(), Pin.IRQ_RISING)
 
   @property
   def pressed(self) -> bool:
     """ The current pressed state of the button. """
-    return self.__button_pin.value() != 0
+    return self.__button_pin.value() == 0
 
   @property
   def toggle_state(self) -> bool:
@@ -32,14 +34,30 @@ class Button():
     return self.__toggle_state
 
   @property
-  def press_interrupt(self) -> bool:
-    """ Whether or not a button press hardware interrupt has occurred during the current iteration of the main event loop. """
-    return self.__press_interrupt.interrupt
+  def press_interrupt(self) -> HardwareInterrupt:
+    """ The `HardwareInterrupt` associated with button presses. """
+    return self.__press_interrupt
 
   @property
-  def release_interrupt(self) -> bool:
-    """ Whether or not a button release hardware interrupt has occurred during the current iteration of the main event loop. """
-    return self.__release_interrupt.interrupt
+  def press_mutex(self) -> InterruptMutex:
+    """
+    An `InterruptMutex` for locking the press `HardwareInterrupt` handler
+    in order to prevent races with the main event loop.
+    """
+    return self.press_interrupt.mutex
+
+  @property
+  def release_interrupt(self) -> HardwareInterrupt:
+    """ The `HardwareInterrupt` associated with button releases. """
+    return self.__release_interrupt
+
+  @property
+  def release_mutex(self) -> InterruptMutex:
+    """
+    An `InterruptMutex` for locking the release `HardwareInterrupt` handler
+    in order to prevent races with the main event loop.
+    """
+    return self.release_interrupt.mutex
 
   @toggle_state.setter
   def toggle_state(self, value: bool):
@@ -55,42 +73,28 @@ class Button():
     self.__toggle_state = not self.__toggle_state
     return self.__toggle_state
 
-  def register_press_handler(self, handler):
+  def press_handler(self, func):
     """
-    Registers a button press hardware interrupt handler
-    which will be invoked on each button press.
+    Annotation to register a button press hardware interrupt handler function
+    that will be invoked each time the button is pressed.
 
     Args:
-      handler: The button press hardware interrupt handler function.
-    """
-    self.__press_interrupt.register_handler(handler)
+      handler: The hardware interrupt handler function to register.
 
-  def unregister_press_handler(self, handler):
+    Returns:
+      The registered hardware interrupt handler function.
     """
-    Unregisters a button press hardware interrupt handler
-    so that it will no longer be invoked on each button press.
+    return self.__press_interrupt.handler(func)
 
-    Args:
-      handler: The button press hardware interrupt handler function.
+  def release_handler(self, func):
     """
-    self.__press_interrupt.unregister_handler(handler)
-
-  def register_release_handler(self, handler):
-    """
-    Registers a button release hardware interrupt handler
-    which will be invoked on each button release.
+    Annotation to register a button release hardware interrupt handler function
+    that will be invoked each time the button is released.
 
     Args:
-      handler: The button release hardware interrupt handler function.
-    """
-    self.__release_interrupt.register_handler(handler)
+      handler: The hardware interrupt handler function to register.
 
-  def unregister_release_handler(self, handler):
+    Returns:
+      The registered hardware interrupt handler function.
     """
-    Unregisters a button release hardware interrupt handler
-    so that it will no longer by invoked on each button press.
-
-    Args:
-      handler: The button release hardware interrupt handler function.
-    """
-    self.__release_interrupt.unregister_handler(handler)
+    return self.__release_interrupt.handler(func)

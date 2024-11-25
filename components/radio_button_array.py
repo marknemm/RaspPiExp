@@ -14,7 +14,7 @@ class RadioButtonArray:
     self.__sel_idx = None
 
     for i, button in enumerate(self.__buttons):
-      button.register_release_handler(
+      button.release_interrupt.handler(
         lambda button_idx = i: # capture current value of i
           self.__handle_button_release(button_idx))
 
@@ -36,17 +36,6 @@ class RadioButtonArray:
       raise IndexError(f"Index out of bounds for RadioButtonArray with length {self.len}: {value}")
 
     self.__sel_idx = value
-
-  @property
-  def sel_interrupt(self):
-    """
-    Whether a hardware interrupt has occurred during the
-    current iteration of the main event loop resulting in a new button selection.
-    """
-    for button in self.__buttons:
-      if button.release_interrupt:
-        return True
-    return False
 
   def append(self, pin_id: int):
     """
