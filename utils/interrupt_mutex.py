@@ -2,9 +2,18 @@ class InterruptMutex:
   """
   A mutex lock for preventing multiple simultaneous invocations
   of a function shared by the main event loop and hardware interrupts.
+
+  Can be bound to a method via decorator or by manually invoking `bind`.
   """
 
-  def __init__(self):
+  def __init__(self, discard_duplicates = False, manual = False):
+    """
+    Args:
+      discard_duplicates: Whether to discard all duplicate blocked calls to the bound function when locked. Only the last call will be kept. Defaults to `False`.
+      manual: Whether `lock` and `unlock` must be manually called; disables the automatic locking mechanism on the bound function's invocation. Defaults to `False`.
+    """
+    self.discard_duplicates = discard_duplicates
+    self.manual = manual
     self.__locked = False
     self.__blocked_invocations = []
 
@@ -24,7 +33,7 @@ class InterruptMutex:
     """ The current locked state of the mutex. """
     return self.__locked
 
-  def bind(self, func):
+  def bind(self, func, discard_duplicates: bool | None = None, manual: bool | None = None):
     """
     Binds this mutex to a given function.
 
@@ -36,20 +45,29 @@ class InterruptMutex:
     being invoked by the main event loop will be queued for immediate sequential
     invocation after the main event loop exists the function.
 
-    Can be used as an annotation on a function or called directly.
-
     Args:
       func: The function to bind the mutex lock to.
+      discard_duplicates: Whether to discard all duplicate blocked calls to `func` when locked. Only the last call will be kept. Defaults to `self.discard_duplicates`.
+      manual: Whether `lock` and `unlock` must be manually called; disables the automatic locking mechanism on `func` invocation. Defaults to `self.manual`.
 
     Returns:
       The input `func` controlled by this mutex lock.
     """
+    if discard_duplicates is None:
+      discard_duplicates = self.discard_duplicates
+    if manual is None:
+      manual = self.manual
+
     def wrapper(*args, **kwargs):
       if self.locked:
+        if discard_duplicates:
+          self.__blocked_invocations.clear()
         self.__blocked_invocations.append(lambda: func(*args, **kwargs))
-      else:
+      elif not manual:
         with self:
           func(*args, **kwargs)
+      else:
+        func(*args, **kwargs)
 
     return wrapper
 

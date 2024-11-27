@@ -20,7 +20,7 @@ def toggle_temperature_unit():
 
   output_dht()
 
-@InterruptMutex()
+@InterruptMutex(discard_duplicates = True)
 def output_dht():
   """ Output DHT sensor data to the LCD display. """
   text = f"T: {dht.temperature()} {dht.temperature_unit}\nH: {dht.humidity()} %"
