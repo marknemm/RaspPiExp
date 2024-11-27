@@ -1,9 +1,15 @@
 class InterruptMutex:
-  """ A mutex lock for preventing bound function invocations within the context of hardware interrupts. """
+  """
+  A mutex lock for preventing multiple simultaneous invocations
+  of a function shared by the main event loop and hardware interrupts.
+  """
 
   def __init__(self):
     self.__locked = False
-    self.__blocked_interrupt_handlers = []
+    self.__blocked_invocations = []
+
+  def __call__(self, func):
+    return self.bind(func)
 
   def __enter__(self):
     self.lock()
@@ -22,8 +28,13 @@ class InterruptMutex:
     """
     Binds this mutex to a given function.
 
-    It will prevent it from being invoked if the `locked` state is `True`,
-    and will immediately invoke any prevented function calls once the mutex is unlocked.
+    It will only allow one invocation of the bound function at a time by
+    blocking any invocation of the function by a hardware interrupt when
+    the main event loop is in the process of invoking it.
+
+    Any attempts to invoke the bound function by a hardware interrupt while
+    being invoked by the main event loop will be queued for immediate sequential
+    invocation after the main event loop exists the function.
 
     Can be used as an annotation on a function or called directly.
 
@@ -35,9 +46,10 @@ class InterruptMutex:
     """
     def wrapper(*args, **kwargs):
       if self.locked:
-        self.__blocked_interrupt_handlers.append(lambda: func(*args, **kwargs))
+        self.__blocked_invocations.append(lambda: func(*args, **kwargs))
       else:
-        func(*args, **kwargs)
+        with self:
+          func(*args, **kwargs)
 
     return wrapper
 
@@ -54,7 +66,7 @@ class InterruptMutex:
     Unlocks this mutex which immediately invokes any blocked function calls to bound functions
     in the order that they occurred while locked.
     """
-    while self.__blocked_interrupt_handlers:
-      handler = self.__blocked_interrupt_handlers.pop(0)
+    while self.__blocked_invocations:
+      handler = self.__blocked_invocations.pop(0)
       handler()
-    self.__locked = False # Important to do this last so additional interrupts don't interrupt queued interrupts during unlock.
+    self.__locked = False # Important to do this last so additional interrupts don't interrupt queued blocked invocations during unlock.

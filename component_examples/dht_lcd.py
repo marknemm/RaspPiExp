@@ -1,4 +1,5 @@
 from utils.main_loop import main_loop
+from utils.interrupt_mutex import InterruptMutex
 from components.button import Button
 from components.dht import DHT
 from components.lcd import LCD
@@ -7,7 +8,7 @@ dht = DHT(version = 11, pin_id = 16)
 lcd = LCD(sda_pin_id = 2, scl_pin_id = 3)
 unit_toggle = Button(15)
 
-@unit_toggle.release_handler
+@unit_toggle.release_handler()
 def toggle_temperature_unit():
   """ Toggles the temperature unit to use when measuring DHT temperature data. """
   if dht.temperature_unit == 'F':
@@ -19,9 +20,10 @@ def toggle_temperature_unit():
 
   output_dht()
 
+@InterruptMutex()
 def output_dht():
   """ Output DHT sensor data to the LCD display. """
   text = f"T: {dht.temperature()} {dht.temperature_unit}\nH: {dht.humidity()} %"
   lcd.message(text)
 
-main_loop(output_dht, 1000, cleanup = lcd.clear, auto_lock_interrupts = True)
+main_loop(output_dht, 1000, cleanup = lcd.clear)

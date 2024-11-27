@@ -5,7 +5,7 @@ from components.button import Button
 unit_toggle = Button(15)
 sensor = DHT11(16)
 
-@unit_toggle.release_handler
+@unit_toggle.release_handler(with_mutex = True)
 def print_measurements():
   """ Prints the measurements acquired by the DHT sensor. """
   temperature = sensor.temperature()
@@ -21,7 +21,6 @@ def print_measurements():
 def measure_dht():
   """ Measures and prints the digital humidity and temperature. """
   sensor.measure()
-  with unit_toggle.release_mutex:
-    print_measurements()
+  print_measurements()
 
 main_loop(measure_dht, 1000)

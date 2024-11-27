@@ -1,6 +1,5 @@
 from machine import Pin
-from utils.hardware_interrupt import HardwareInterrupt
-from utils.interrupt_mutex import InterruptMutex
+from utils.interrupt_listener import InterruptListener
 
 class Button():
   """
@@ -17,11 +16,14 @@ class Button():
     self.__button_pin = Pin(pin_id, Pin.IN, Pin.PULL_UP)
     self.__toggle_state = init_toggle_state
 
-    self.__press_interrupt = HardwareInterrupt()
-    self.__release_interrupt = HardwareInterrupt(self.toggle)
+    self.__press_listener = InterruptListener()
+    self.__release_listener = InterruptListener(self.toggle)
 
-    self.__button_pin.irq(self.__press_interrupt.listener(), Pin.IRQ_FALLING)
-    self.__button_pin.irq(self.__release_interrupt.listener(), Pin.IRQ_RISING)
+    self.__button_pin.irq(self.__press_listener.listen(), Pin.IRQ_FALLING)
+    self.__button_pin.irq(self.__release_listener.listen(), Pin.IRQ_RISING)
+
+    self.press_handler = self.__press_listener.handler
+    self.release_handler = self.__release_listener.handler
 
   @property
   def pressed(self) -> bool:
@@ -32,32 +34,6 @@ class Button():
   def toggle_state(self) -> bool:
     """ The current toggle state of the button. """
     return self.__toggle_state
-
-  @property
-  def press_interrupt(self) -> HardwareInterrupt:
-    """ The `HardwareInterrupt` associated with button presses. """
-    return self.__press_interrupt
-
-  @property
-  def press_mutex(self) -> InterruptMutex:
-    """
-    An `InterruptMutex` for locking the press `HardwareInterrupt` handler
-    in order to prevent races with the main event loop.
-    """
-    return self.press_interrupt.mutex
-
-  @property
-  def release_interrupt(self) -> HardwareInterrupt:
-    """ The `HardwareInterrupt` associated with button releases. """
-    return self.__release_interrupt
-
-  @property
-  def release_mutex(self) -> InterruptMutex:
-    """
-    An `InterruptMutex` for locking the release `HardwareInterrupt` handler
-    in order to prevent races with the main event loop.
-    """
-    return self.release_interrupt.mutex
 
   @toggle_state.setter
   def toggle_state(self, value: bool):
@@ -72,29 +48,3 @@ class Button():
     """
     self.__toggle_state = not self.__toggle_state
     return self.__toggle_state
-
-  def press_handler(self, func):
-    """
-    Annotation to register a button press hardware interrupt handler function
-    that will be invoked each time the button is pressed.
-
-    Args:
-      handler: The hardware interrupt handler function to register.
-
-    Returns:
-      The registered hardware interrupt handler function.
-    """
-    return self.__press_interrupt.handler(func)
-
-  def release_handler(self, func):
-    """
-    Annotation to register a button release hardware interrupt handler function
-    that will be invoked each time the button is released.
-
-    Args:
-      handler: The hardware interrupt handler function to register.
-
-    Returns:
-      The registered hardware interrupt handler function.
-    """
-    return self.__release_interrupt.handler(func)
