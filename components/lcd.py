@@ -1,20 +1,17 @@
-from machine import Pin, I2C
+from machine import I2C
 from utime import sleep_ms
 
-class LCD():
+class LCD1602():
 	""" An LCD screen that displays up to `2 rows` of data, each with up to `16 characters`. """
 
-	def __init__(self, sda_pin_id: int, scl_pin_id: int, addr = None, blen = 1):
+	def __init__(self, i2c: I2C, addr = None, blen = 1):
 		"""
 		Args:
-			sda_pin_id: The ID of the SDA Pin.
-			scl_pin_id: The ID of the SCL Pin.
+			i2c: The `I2C` bus that the LCD screen is connected to.
 			addr: The optional initial memory (byte) address to scan. Defaults to `None` for automatic.
 			blen: Defaults to `1`.
 		"""
-		sda = Pin(sda_pin_id)
-		scl = Pin(scl_pin_id)
-		self.bus = I2C(1, sda=sda, scl=scl, freq=400000)
+		self.bus = i2c
 		self.addr = self.scan_address(addr)
 		self.blen = blen
 		self.__cursor_addr = 0x80

@@ -1,11 +1,13 @@
+from machine import I2C
 from utils.main_loop import main_loop
 from utils.interrupt_mutex import InterruptMutex
 from components.button import Button
 from components.dht import DHT
-from components.lcd import LCD
+from components.lcd import LCD1602
 
 dht = DHT(version = 11, pin_id = 16)
-lcd = LCD(sda_pin_id = 2, scl_pin_id = 3)
+i2c = I2C(1, sda = 2, scl = 3, freq = 400000)
+lcd = LCD1602(i2c)
 unit_toggle = Button(15)
 
 @unit_toggle.release_handler()

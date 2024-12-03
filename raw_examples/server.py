@@ -1,8 +1,8 @@
-from socket import socket, AF_INET, SOCK_DGRAM
-import network
+from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_BROADCAST
+from network import WLAN, STA_IF
 from time import sleep_ms
 
-wifi = network.WLAN(network.STA_IF)
+wifi = WLAN(STA_IF)
 wifi.active(True)
 wifi.connect('MySpectrumWiFi43-2G', 'famousgate426')
 
@@ -16,7 +16,8 @@ SERVER_PORT = 2222
 BUFFER_SIZE = 1024 # bytes
 
 udp_server = socket(AF_INET, SOCK_DGRAM)
-udp_server.bind((server_ip, SERVER_PORT))
+udp_server.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+udp_server.bind(('', SERVER_PORT))
 
 try:
   while True:
