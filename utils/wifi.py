@@ -57,7 +57,7 @@ class WiFi(WLAN):
     *,
     bssid: str | None = None,
     non_blocking = False,
-    timeout_ms = 10000
+    timeout_ms = 30000
   ) -> 'WiFi':
     """
     Connects this device to WLAN Wi-Fi. Implicitly invokes `active(True)` before forming the connection.
@@ -84,7 +84,7 @@ class WiFi(WLAN):
       while not self.isconnected():
         sleep_ms(10)
         if ticks_diff(ticks_ms(), start_tick) >= timeout_ms:
-          raise TimeoutError(f"Could not connect to Wi-Fi using ssid {ssid} within {timeout_ms}ms.")
+          raise RuntimeError(f"Could not connect to Wi-Fi using ssid {ssid} within {timeout_ms}ms.")
 
     WiFi.__CONNECTIONS[self.config('ssid')] = self
     return self

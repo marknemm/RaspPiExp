@@ -1,4 +1,4 @@
-from utils.main_loop import main_loop
+from utils.main_loop import MainLoop
 from utils.exponential_normalizer import ExponentialNormalizer
 from utils.linear_normalizer import LinearNormalizer
 from components.radio_button_array import RadioButtonArray
@@ -19,4 +19,4 @@ def process_controls():
 
   print("\r", f"Intensity: {led.intensity}    Frequency: {led.freq}", end='               ')
 
-main_loop(process_controls, setup = led.on, cleanup = led.off)
+MainLoop.run(process_controls, setup = led.on, cleanup = led.off)

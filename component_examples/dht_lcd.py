@@ -1,5 +1,5 @@
 from machine import I2C
-from utils.main_loop import main_loop
+from utils.main_loop import MainLoop
 from utils.interrupt_mutex import InterruptMutex
 from components.button import Button
 from components.dht import DHT
@@ -28,4 +28,4 @@ def output_dht():
   text = f"T: {dht.temperature()} {dht.temperature_unit}\nH: {dht.humidity()} %"
   lcd.message(text)
 
-main_loop(output_dht, 1000, cleanup = lcd.clear)
+MainLoop.run(output_dht, 1000, cleanup = lcd.clear)

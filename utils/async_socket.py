@@ -45,15 +45,46 @@ class AsyncSocket(socket):
     super().settimeout(value)
     self.__timeout = value
 
+  async def async_accept(self, async_sleep_ms = 100):
+    """
+    Accept a connection on the TCP socket in a non-blocking async manner.
+
+    Args:
+      async_sleep_ms: The amount of time in milliseconds to sleep between checking for a new connection. Defaults to `100`.
+
+    Returns:
+      A tuple pair (conn, address) where conn is a new socket object usable to send and receive data on the connection,
+      and address is the address bound to the socket on the other end of the connection.
+    """
+    connection = None
+
+    while not connection:
+      try:
+        timeout = self.__timeout
+        if timeout is None:
+          self.setblocking(False)
+
+        connection = self.accept()
+
+        if timeout is not None:
+          self.settimeout(timeout)
+      except OSError:
+        pass
+      finally:
+        await async_sleep(async_sleep_ms / 1000)
+
+    return connection
+
+
   async def async_recvfrom(self, bufsize: int, async_sleep_ms = 100):
     """
     Receive data from the socket in a non-blocking async manner.
 
     Args:
       bufsize: The size of the bytes message buffer.
-
+      async_sleep_ms: The amount of time in milliseconds to sleep between checking for received data. Defaults to `100`.
     Returns:
-      An `AsyncGenerator` yielding a pair (bytes, address) where bytes is a bytes object
+      A tuple pair (bytes, address) where bytes is a bytes object
       representing the data received and address is the address of the socket sending the data.
     """
     recv_data = None

@@ -1,5 +1,5 @@
 from dht import DHT11
-from utils.main_loop import main_loop
+from utils.main_loop import MainLoop
 from components.button import Button
 
 unit_toggle = Button(15)
@@ -23,4 +23,4 @@ def measure_dht():
   sensor.measure()
   print_measurements()
 
-main_loop(measure_dht, 1000)
+MainLoop.run(measure_dht, 1000)

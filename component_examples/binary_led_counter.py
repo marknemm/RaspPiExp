@@ -1,4 +1,4 @@
-from utils.main_loop import main_loop
+from utils.main_loop import MainLoop
 from components.led import LED
 
 led_arr = [
@@ -23,4 +23,4 @@ def increment_counter():
   binary_arr.reverse()
   print(binary_arr)
 
-main_loop(increment_counter, 300, setup = reset_leds, cleanup = reset_leds)
+MainLoop.run(increment_counter, 300, setup = reset_leds, cleanup = reset_leds)
